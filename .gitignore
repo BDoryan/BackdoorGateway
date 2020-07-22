@@ -1,0 +1,6 @@
+/bin/
+/target/*
+!/target/config.properties
+.project
+.classpath
+.settings
