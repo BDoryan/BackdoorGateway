@@ -40,7 +40,8 @@ public class GatewayServer extends Thread {
 	public void run() {
 		try {
 			this.serverSocket = new ServerSocket(port);
-			
+			System.out.println("The server is started on port: "+port);
+			System.out.println("Waiting clients...");
 			while(!this.serverSocket.isClosed()) {
 				Socket socket = new Socket();
 				GatewayClient client = new GatewayClient();
@@ -57,7 +58,7 @@ public class GatewayServer extends Thread {
 					}, 5000);
 				} catch (SQLException e) {
 					e.printStackTrace();
-					System.err.println("The client(\"+socket.getInetAddress().getHostAddress()+\":\"+socket.getPort()+\") could not log in, an error occurred!");
+					System.err.println("The client("+socket.getInetAddress().getHostAddress()+":"+socket.getPort()+") could not log in, an error occurred!");
 				}
 			}
 		} catch (IOException e) {
