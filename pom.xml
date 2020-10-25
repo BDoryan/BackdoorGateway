@@ -2,9 +2,9 @@
 	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
-	<groupId>gateway.isotopestudio.fr</groupId>
-	<artifactId>IsotopeStudioGateway</artifactId>
-	<version>0.0.1-SNAPSHOT</version>
+	<groupId>isotopestudio.backdoor.gateway</groupId>
+	<artifactId>gateway</artifactId>
+	<version>0.0.74-SNAPSHOT</version>
 	<build>
 		<sourceDirectory>src</sourceDirectory>
 		<resources>
@@ -38,7 +38,7 @@
 					<archive>
 						<manifest>
 							<addClasspath>true</addClasspath>
-							<mainClass>isotopestudio.backdoor.network.server.GameServer</mainClass>
+							<mainClass>isotopestudio.backdoor.gateway.Gateway</mainClass>
 						</manifest>
 					</archive>
 				</configuration>
@@ -113,14 +113,14 @@
 
 	<dependencies>
 		<dependency>
-			<groupId>mysql</groupId>
+			<groupId>mysql</groupId> 
 			<artifactId>mysql-connector-java</artifactId>
 			<version>8.0.19</version>
 		</dependency>
 		<dependency>
 			<groupId>doryanbessiere.isotopestudio.api</groupId>
 			<artifactId>isotopestudioapi</artifactId>
-			<version>1.1.23</version>
+			<version>1.1.32</version>
 		</dependency>
 		<dependency>
 			<groupId>commons-io</groupId>

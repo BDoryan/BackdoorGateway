@@ -1,4 +1,4 @@
-package gateway.isotopestudio.fr;
+package isotopestudio.backdoor.gateway;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -6,14 +6,17 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.Properties;
 
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+
 import doryanbessiere.isotopestudio.api.IsotopeStudioAPI;
-import doryanbessiere.isotopestudio.api.mysql.SQL;
-import doryanbessiere.isotopestudio.api.mysql.SQLDatabase;
 import doryanbessiere.isotopestudio.commons.LocalDirectory;
 import doryanbessiere.isotopestudio.commons.RunnerUtils;
 import doryanbessiere.isotopestudio.commons.logger.Logger;
 import doryanbessiere.isotopestudio.commons.logger.file.LoggerFile;
-import gateway.isotopestudio.fr.server.GatewayServer;
+import doryanbessiere.isotopestudio.commons.mysql.SQL;
+import doryanbessiere.isotopestudio.commons.mysql.SQLDatabase;
+import isotopestudio.backdoor.gateway.server.GatewayServer;
 
 /**
  * @author BESSIERE
@@ -25,6 +28,7 @@ public class Gateway {
 	private static String version = null;
 	private static Logger logger;
 	private static SQLDatabase database;
+	private static Gson gson = new GsonBuilder().create();
 	
 	private static GatewayServer server;
 
@@ -111,5 +115,12 @@ public class Gateway {
 	 */
 	public static Properties getConfiguration() {
 		return configuration;
+	}
+
+	/**
+	 * @return
+	 */
+	public static Gson getGson() {
+		return gson;
 	}
 }
