@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Properties;
 
 import com.google.gson.Gson;
@@ -16,6 +17,7 @@ import doryanbessiere.isotopestudio.commons.logger.Logger;
 import doryanbessiere.isotopestudio.commons.logger.file.LoggerFile;
 import doryanbessiere.isotopestudio.commons.mysql.SQL;
 import doryanbessiere.isotopestudio.commons.mysql.SQLDatabase;
+import isotopestudio.backdoor.gateway.packet.packets.PacketClientChatMessage;
 import isotopestudio.backdoor.gateway.server.GatewayServer;
 
 /**
@@ -31,6 +33,8 @@ public class Gateway {
 	private static Gson gson = new GsonBuilder().create();
 	
 	private static GatewayServer server;
+	
+	private static ArrayList<PacketClientChatMessage> messages = new ArrayList<>();
 
 	public static void main(String[] args) {
 		RunnerUtils arguments = new RunnerUtils(args);
@@ -122,5 +126,12 @@ public class Gateway {
 	 */
 	public static Gson getGson() {
 		return gson;
+	}
+	
+	/**
+	 * @return the messages
+	 */
+	public static ArrayList<PacketClientChatMessage> getMessages() {
+		return messages;
 	}
 }

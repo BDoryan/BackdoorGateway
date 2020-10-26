@@ -104,8 +104,7 @@ public class GatewayRemoteClient extends Thread {
 		setConnected(false);
 	}
 
-	public void sendData(String dataString) throws IOException {
-		byte[] data = dataString.getBytes();
+	public void sendData(String data) throws IOException {
 		write(data);
 	}
 
@@ -114,15 +113,15 @@ public class GatewayRemoteClient extends Thread {
 	}
 
 	public Packet readPacket() throws IOException {
-		Packet packet = Packet.parsePacket(new String(read()));
+		Packet packet = Packet.parsePacket(read());
 		packet.read();
 		// System.out.println("[Packet] receive -> "+packet.toData());
 		return packet;
 	}
 
-	public void write(byte[] bytes) throws IOException {
+	public void write(String data) throws IOException {
 		// output.writeInt(bytes.length);
-		output.writeUTF(new String(bytes));
+		output.writeUTF(data);
 		output.flush();
 	}
 
@@ -137,8 +136,8 @@ public class GatewayRemoteClient extends Thread {
 		}
 	}
 
-	public byte[] read() throws IOException {
-		return input.readUTF().getBytes();
+	public String read() throws IOException {
+		return input.readUTF();
 	}
 
 	/**

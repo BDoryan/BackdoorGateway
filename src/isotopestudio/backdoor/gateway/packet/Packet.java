@@ -1,6 +1,7 @@
 package isotopestudio.backdoor.gateway.packet;
 
-import isotopestudio.backdoor.gateway.packet.packets.PacketClientChat;
+import isotopestudio.backdoor.gateway.packet.packets.PacketClientChatMessage;
+import isotopestudio.backdoor.gateway.packet.packets.PacketClientChatMessages;
 import isotopestudio.backdoor.gateway.packet.packets.PacketClientDisconnected;
 import isotopestudio.backdoor.gateway.server.GatewayRemoteClient;
 import isotopestudio.backdoor.gateway.server.GatewayServer;
@@ -10,11 +11,13 @@ public abstract class Packet {
 	public static final char SEPARATOR = '/';
 
 	public static final int CLIENT_DISCONNECTED = 1;
-	public static final int CLIENT_CHAT = 2;
+	public static final int CLIENT_CHAT_MESSAGE = 2;
+	public static final int CLIENT_CHAT_MESSAGES = 3;
 
 	public static Packet[] packets = new Packet[] {null, 
 		new PacketClientDisconnected(),
-		new PacketClientChat()
+		new PacketClientChatMessage(),
+		new PacketClientChatMessages()
 	};
 
 	public static Packet parsePacket(String data) {
