@@ -4,13 +4,20 @@ import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
 import java.net.Socket;
+import java.net.SocketException;
 import java.sql.SQLException;
+import java.util.UUID;
 
 import doryanbessiere.isotopestudio.api.authentification.User;
+import doryanbessiere.isotopestudio.api.profile.Profile;
 import doryanbessiere.isotopestudio.commons.mysql.SQLDatabase;
 import isotopestudio.backdoor.gateway.Gateway;
+import isotopestudio.backdoor.gateway.lobby.Lobby;
 import isotopestudio.backdoor.gateway.packet.Packet;
+import isotopestudio.backdoor.gateway.packet.packets.PacketClientChatMessage;
 import isotopestudio.backdoor.gateway.packet.packets.PacketClientDisconnected;
+import isotopestudio.backdoor.gateway.packet.packets.PacketClientReceiveNotification;
+import isotopestudio.backdoor.gateway.party.Party;
 
 /**
  * @author BESSIERE
@@ -27,6 +34,9 @@ public class GatewayRemoteClient extends Thread {
 	private boolean connected;
 	private boolean authenticated;
 
+	private Lobby lobby;
+	private Party party;
+
 	public void connect(Socket socket) throws IOException, SQLException {
 		this.socket = socket;
 		this.output = new DataOutputStream(this.socket.getOutputStream());
@@ -40,14 +50,15 @@ public class GatewayRemoteClient extends Thread {
 		SQLDatabase database = Gateway.getDatabase();
 
 		try {
-			String[] authentification = input.readUTF().split(";");
-			if(authentification.length == 3) {
-				if(!authentification[0].equals(Gateway.getVersion())) {
-					kick("wrong_version");	
+			String[] authentification = read().split(";");
+			if (authentification.length == 3) {
+				if (!authentification[0].equals(Gateway.getVersion())) {
+					kick("wrong_version");
 					return;
 				}
 				if (database.has("users", "email", authentification[1])) {
-					if (database.getString("users", "email", authentification[1], "token").equals(authentification[2])) {
+					if (database.getString("users", "email", authentification[1], "token")
+							.equals(authentification[2])) {
 						authenticated = true;
 						this.user = User.fromJson(database.getString("users_data", "uuid",
 								database.getString("users", "email", authentification[1], "uuid"), "json"));
@@ -56,18 +67,23 @@ public class GatewayRemoteClient extends Thread {
 						return;
 					}
 				}
-				kick("authentification_failed");	
+				kick("authentification_failed");
 			} else {
-				kick("authentification_invalid");	
+				kick("authentification_invalid");
 			}
 		} catch (IOException | SQLException e1) {
 			e1.printStackTrace();
 		}
 	}
-	
+
+	public void sendChatMessage(String message) throws IOException {
+		Profile profile = new Profile(UUID.randomUUID().toString(), "SERVER", true, null);
+		sendPacket(new PacketClientChatMessage(profile, System.currentTimeMillis(), message.isEmpty() ? " " : message));
+	}
+
 	private void connected() {
-		System.out.println("[" + (user != null ? user.getUsername()
-				: socket.getInetAddress().getHostAddress()) + "] is logged into the gateway :D");
+		System.out.println("[" + (user != null ? user.getUsername() : socket.getInetAddress().getHostAddress())
+				+ "] is logged into the gateway :D");
 		while (connected && authenticated) {
 			try {
 				Packet packet = readPacket();
@@ -94,8 +110,16 @@ public class GatewayRemoteClient extends Thread {
 	}
 
 	public void disconnected() {
-		System.out.println("[" + (user != null ? user.getUsername()
-				: socket.getInetAddress().getHostAddress()) + "] is no longer connected to the gateway.");
+		if (hasLobby()) {
+			if (getLobby().getOwner().equals(this)) {
+				getLobby().destroy();
+			} else {
+				getLobby().leave(this);
+			}
+		}
+
+		System.out.println("[" + (user != null ? user.getUsername() : socket.getInetAddress().getHostAddress())
+				+ "] is no longer connected to the gateway.");
 		Gateway.getGatewayServer().clients.remove(this);
 		try {
 			socket.close();
@@ -108,13 +132,41 @@ public class GatewayRemoteClient extends Thread {
 		write(data);
 	}
 
+	/**
+	 * @throws IOException
+	 *
+	 *                     Send packet to clients target
+	 * 
+	 */
 	public void sendPacket(Packet packet) throws IOException {
-		sendData(packet.toData());
+		String data = packet.toData();
+		sendData(data);
+		Gateway.getLogger()
+				.debug("sendPacket("
+						+ (getUser() != null ? getUser().getUsername() : getSocket().getInetAddress().getAddress())
+						+ ", " + data + ")");
+	}
+
+	/**
+	 * @throws IOException
+	 *
+	 *                     Send packets to server
+	 * 
+	 */
+	public void sendPackets(Packet[] packets) throws IOException {
+		for (Packet packet : packets) {
+			sendPacket(packet);
+		}
 	}
 
 	public Packet readPacket() throws IOException {
-		Packet packet = Packet.parsePacket(read());
+		String data = read();
+		Packet packet = Packet.parsePacket(data);
 		packet.read();
+		Gateway.getLogger()
+				.debug("readPacket("
+						+ (getUser() != null ? getUser().getUsername() : getSocket().getInetAddress().getAddress())
+						+ ", " + data + ")");
 		// System.out.println("[Packet] receive -> "+packet.toData());
 		return packet;
 	}
@@ -127,8 +179,8 @@ public class GatewayRemoteClient extends Thread {
 
 	public void close() {
 		try {
-			if(!socket.isClosed())
-			socket.close();
+			if (!socket.isClosed())
+				socket.close();
 			input.close();
 			output.close();
 		} catch (IOException e) {
@@ -169,9 +221,69 @@ public class GatewayRemoteClient extends Thread {
 	}
 
 	/**
+	 * @param party the party to set
+	 */
+	public void setParty(Party party) {
+		this.party = party;
+	}
+
+	/**
+	 * @return the party
+	 */
+	public Party getParty() {
+		return party;
+	}
+
+	/**
+	 * @return if you are in a party
+	 */
+	public boolean inParty() {
+		return getParty() != null;
+	}
+
+	/**
+	 * @param lobby the lobby to set
+	 */
+	public void setLobby(Lobby lobby) {
+		this.lobby = lobby;
+	}
+
+	/**
+	 * @param lobby2
+	 */
+	public void invite(Lobby lobby) {
+		lobby.whitelist(getUser().getUUIDString());
+	}
+
+	/**
+	 * @return the lobby
+	 */
+	public Lobby getLobby() {
+		return lobby;
+	}
+
+	/**
+	 * @return true if you are in a lobby
+	 */
+	public boolean hasLobby() {
+		return lobby != null;
+	}
+
+	/**
 	 * @param b
 	 */
 	public void setConnected(boolean connected) {
 		this.connected = connected;
+	}
+
+	/**
+	 * @param image_path
+	 * @param title
+	 * @param message
+	 * 
+	 * @throws IOException
+	 */
+	public void sendNotification(String image_path, String title, String message) throws IOException {
+		sendPacket(new PacketClientReceiveNotification(image_path, title, message));
 	}
 }

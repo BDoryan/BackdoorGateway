@@ -4,7 +4,7 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>isotopestudio.backdoor.gateway</groupId>
 	<artifactId>gateway</artifactId>
-	<version>0.0.75-SNAPSHOT</version>
+	<version>0.0.76-SNAPSHOT</version>
 	<build>
 		<sourceDirectory>src</sourceDirectory>
 		<resources>
@@ -113,6 +113,11 @@
 
 	<dependencies>
 		<dependency>
+			<groupId>isotopestudio.backdoor.core</groupId>
+			<artifactId>backdoorcore</artifactId>
+			<version>1.0.29</version>
+		</dependency>
+		<dependency>
 			<groupId>mysql</groupId> 
 			<artifactId>mysql-connector-java</artifactId>
 			<version>8.0.19</version>
@@ -120,7 +125,12 @@
 		<dependency>
 			<groupId>doryanbessiere.isotopestudio.api</groupId>
 			<artifactId>isotopestudioapi</artifactId>
-			<version>1.1.32</version>
+			<version>1.1.34</version>
+		</dependency>
+		<dependency>
+			<groupId>isotopestudio.backdoor.network</groupId>
+			<artifactId>backdoorserver</artifactId>
+			<version>${project.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>commons-io</groupId>

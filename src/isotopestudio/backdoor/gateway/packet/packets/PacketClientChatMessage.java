@@ -7,6 +7,7 @@ import org.apache.http.client.ClientProtocolException;
 import doryanbessiere.isotopestudio.api.authentification.User;
 import doryanbessiere.isotopestudio.api.profile.Profile;
 import isotopestudio.backdoor.gateway.Gateway;
+import isotopestudio.backdoor.gateway.command.ICommand;
 import isotopestudio.backdoor.gateway.packet.Packet;
 import isotopestudio.backdoor.gateway.server.GatewayRemoteClient;
 import isotopestudio.backdoor.gateway.server.GatewayServer;
@@ -72,7 +73,15 @@ public class PacketClientChatMessage extends Packet {
 	public void process(GatewayServer server, GatewayRemoteClient client) {
 		User user = client.getUser();
 		try {
-			PacketClientChatMessage packet = new PacketClientChatMessage((profile = new Profile(user.getUUIDString(), user.getUsername(), true, null)), System.currentTimeMillis(), message);
+			profile = new Profile(user.getUUIDString(), user.getUsername(), true, null);
+			if(getMessage().startsWith("/")) {
+				if(!ICommand.command(client, getMessage().substring(1))){
+					client.sendChatMessage("Command invalid!");
+				}
+				System.out.println("[COMMAND] ["+profile.getUsername()+"] > "+message);
+				return;
+			}
+			PacketClientChatMessage packet = new PacketClientChatMessage(profile, System.currentTimeMillis(), message);
 			server.sendPacket(packet, server.clients.toArray(new GatewayRemoteClient[0]));
 			Gateway.getMessages().add(packet);
 			System.out.println("[CHAT] ["+profile.getUsername()+"] > "+message);

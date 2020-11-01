@@ -2,7 +2,9 @@ package isotopestudio.backdoor.gateway.packet;
 
 import isotopestudio.backdoor.gateway.packet.packets.PacketClientChatMessage;
 import isotopestudio.backdoor.gateway.packet.packets.PacketClientChatMessages;
+import isotopestudio.backdoor.gateway.packet.packets.PacketClientConnectToServer;
 import isotopestudio.backdoor.gateway.packet.packets.PacketClientDisconnected;
+import isotopestudio.backdoor.gateway.packet.packets.PacketClientReceiveNotification;
 import isotopestudio.backdoor.gateway.server.GatewayRemoteClient;
 import isotopestudio.backdoor.gateway.server.GatewayServer;
 
@@ -13,11 +15,15 @@ public abstract class Packet {
 	public static final int CLIENT_DISCONNECTED = 1;
 	public static final int CLIENT_CHAT_MESSAGE = 2;
 	public static final int CLIENT_CHAT_MESSAGES = 3;
+	public static final int CLIENT_RECEIVE_NOTIFICATION = 4;
+	public static final int CLIENT_CONNECT_TO_SERVER = 5;
 
 	public static Packet[] packets = new Packet[] {null, 
 		new PacketClientDisconnected(),
 		new PacketClientChatMessage(),
-		new PacketClientChatMessages()
+		new PacketClientChatMessages(),
+		new PacketClientReceiveNotification(),
+		new PacketClientConnectToServer()
 	};
 
 	public static Packet parsePacket(String data) {
@@ -76,7 +82,7 @@ public abstract class Packet {
 	// for skip the first information (packet id)
 	int read_index = 1;
 
-	public String readString() {
+	public String readString() throws IllegalStateException {
 		String data = datas[read_index];
 		read_index++;
 		String data_string = data.trim().replace("%20", SEPARATOR+"");

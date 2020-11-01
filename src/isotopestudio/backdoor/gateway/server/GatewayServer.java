@@ -7,10 +7,12 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Timer;
 import java.util.TimerTask;
+import java.util.UUID;
 
 import doryanbessiere.isotopestudio.api.IsotopeStudioAPI;
 import isotopestudio.backdoor.gateway.Gateway;
 import isotopestudio.backdoor.gateway.packet.Packet;
+import isotopestudio.backdoor.gateway.packet.packets.PacketClientReceiveNotification;
 
 /**
  * @author BESSIERE
@@ -29,7 +31,7 @@ public class GatewayServer extends Thread {
 
 	public GatewayRemoteClient getClient(String username) {
 		for (GatewayRemoteClient client : clients) {
-			if (client.getUser().getUsername().equals(username)) {
+			if (client.getUser().getUsername().equalsIgnoreCase(username)) {
 				return client;
 			}
 		}
@@ -72,6 +74,15 @@ public class GatewayServer extends Thread {
 		}
 	}
 
+	public GatewayRemoteClient getClient(UUID uuid) {
+		for(GatewayRemoteClient remoteClient : getClients()){
+			if(remoteClient.getUser().getUUIDString().equals(uuid.toString())) {
+				return remoteClient;
+			}
+		}
+		return null;
+	}
+
 	/**
 	 * Allows you to close tcp server and kill the thread
 	 */
@@ -95,6 +106,13 @@ public class GatewayServer extends Thread {
 	 */
 	public int getPort() {
 		return port;
+	}
+	
+	/**
+	 * @return the clients
+	 */
+	public ArrayList<GatewayRemoteClient> getClients() {
+		return clients;
 	}
 
 	/**
@@ -121,5 +139,21 @@ public class GatewayServer extends Thread {
 			Gateway.getLogger().debug("sendPackets("+Gateway.getGson().toJson(packet)+")");
 			sendPacket(packet, clients);
 		}
+	}
+
+	/**
+	 * @param packet
+	 * @throws IOException 
+	 */
+	public void sendPacketToClients(Packet packet) throws IOException {
+		sendPacket(packet, getClients().toArray(new GatewayRemoteClient[1]));
+	}
+
+	/**
+	 * @param packet
+	 * @throws IOException 
+	 */
+	public void sendPacketsToClients(Packet[] packets) throws IOException {
+		sendPackets(packets, getClients().toArray(new GatewayRemoteClient[1]));
 	}
 }

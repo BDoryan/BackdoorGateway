@@ -4,7 +4,10 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.net.Socket;
+import java.net.UnknownHostException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Properties;
 
 import com.google.gson.Gson;
@@ -17,7 +20,10 @@ import doryanbessiere.isotopestudio.commons.logger.Logger;
 import doryanbessiere.isotopestudio.commons.logger.file.LoggerFile;
 import doryanbessiere.isotopestudio.commons.mysql.SQL;
 import doryanbessiere.isotopestudio.commons.mysql.SQLDatabase;
+import isotopestudio.backdoor.gateway.lobby.Lobby;
+import isotopestudio.backdoor.gateway.matckmaking.Matchmaking;
 import isotopestudio.backdoor.gateway.packet.packets.PacketClientChatMessage;
+import isotopestudio.backdoor.gateway.party.Party;
 import isotopestudio.backdoor.gateway.server.GatewayServer;
 
 /**
@@ -27,10 +33,11 @@ import isotopestudio.backdoor.gateway.server.GatewayServer;
 public class Gateway {
 
 	private static Properties configuration = new Properties();
-	private static String version = null;
+	public static String version = null;
 	private static Logger logger;
 	private static SQLDatabase database;
 	private static Gson gson = new GsonBuilder().create();
+	private static Matchmaking matchmaking = new Matchmaking();
 	
 	private static GatewayServer server;
 	
@@ -50,7 +57,7 @@ public class Gateway {
 		}
 
 		logger = new Logger("Gateway", new LoggerFile(new File(localDirectory(), "logs")));
-		System.out.println("Starting the IsotopeStudio Gateway... (version=" + getVersion() + ")");
+		System.out.println("Starting the Backdoor Gateway... (version=" + getVersion() + ")");
 
 		System.out.println("Retrieving the gateway configuration...");
 		try {
@@ -78,10 +85,77 @@ public class Gateway {
 			return;
 		}
 		
+		Runtime.getRuntime().addShutdownHook(new Thread(new Runnable() {
+			@Override
+			public void run() {
+				if(getCopyParties().size() > 0)
+				for(Party party : getCopyParties().values()) {
+					party.forceStop();
+				}
+			}
+		}));
+		
 		server= new GatewayServer(Integer.valueOf(configuration.getProperty("server.port")));
 		server.start();
 	}
+	
+	public static HashMap<String, Party> parties = new HashMap<>();
+	
+	/**
+	 * @return the parties
+	 */
+	public static HashMap<String, Party> getParties() {
+		return parties;
+	}
+	
+	/**
+	 * @return the copy parties
+	 */
+	public static HashMap<String, Party> getCopyParties() {
+		HashMap<String, Party> parties = new HashMap<>();
+		parties.putAll(Gateway.parties);
+		return parties;
+	}
+	
+	public static int generatePort() {
+		int port = 49152;
+		while(true) {
+			try {
+				Socket socket = new Socket("localhost", port);
+				socket.close();
+			} catch (Exception e) {
+				break;
+			}
+			port++;
+		}
+		return port;
+	}
+	
+	public static ArrayList<Lobby> lobbies = new ArrayList<>();
+	
+	/**
+	 * @return the lobbies
+	 */
+	public static ArrayList<Lobby> getLobbies() {
+		return lobbies;
+	}
 
+	/**
+	 * @return the copy lobbies
+	 */
+	public static ArrayList<Lobby> getCopyLobbies() {
+		ArrayList<Lobby> lobbies = new ArrayList<>();
+		lobbies.addAll(Gateway.lobbies);
+		return lobbies;
+	}
+	
+	/**
+	 * @return the matchmaking
+	 */
+	public static Matchmaking getMatchmaking() {
+		return matchmaking;
+	}
+	
 	/**
 	 * @return the server
 	 */
