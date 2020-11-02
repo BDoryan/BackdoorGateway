@@ -4,7 +4,7 @@ import java.util.ArrayList;
 
 import isotopestudio.backdoor.core.gamemode.GameMode;
 import isotopestudio.backdoor.core.versus.Versus;
-import isotopestudio.backdoor.gateway.lobby.Lobby;
+import isotopestudio.backdoor.gateway.group.Group;
 
 /**
  * @author BESSIERE
@@ -23,12 +23,12 @@ public class Matchmaking {
 		}
 	}
 	
-	public void joinMatchmakingQueue(Lobby lobby, Versus versus, GameMode gameMode) {
-		if(lobby.getPlayers().size() > versus.getMaximum())
+	public void joinMatchmakingQueue(Group group, Versus versus, GameMode gameMode) {
+		if(group.getPlayers().size() > versus.getMaximum())
 			return;
 		
 		MatchmakingQueue matchmakingQueue = getMatchmakingQueue(versus, gameMode);
-		matchmakingQueue.join(lobby);
+		matchmakingQueue.join(group);
 	}
 	
 	public MatchmakingQueue getMatchmakingQueue(Versus versus, GameMode gameMode) {

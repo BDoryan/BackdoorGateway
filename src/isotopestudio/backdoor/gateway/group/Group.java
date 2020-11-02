@@ -1,4 +1,4 @@
-package isotopestudio.backdoor.gateway.lobby;
+package isotopestudio.backdoor.gateway.group;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -13,7 +13,7 @@ import isotopestudio.backdoor.gateway.server.GatewayRemoteClient;
  * @author BESSIERE
  * @github https://www.github.com/DoryanBessiere/
  */
-public class Lobby {
+public class Group {
 
 	private GatewayRemoteClient owner;
 	private boolean isPrivate = true;
@@ -24,14 +24,14 @@ public class Lobby {
 
 	private MatchmakingQueue queue;
 
-	public Lobby(GatewayRemoteClient owner, boolean isPrivate) {
+	public Group(GatewayRemoteClient owner, boolean isPrivate) {
 		this.owner = owner;
 		this.isPrivate = isPrivate;
 		this.players.add(owner);
 		Gateway.getLobbies().add(this);
 		
-		this.owner.setLobby(this);
-		System.out.println("New lobby created by " + owner.getUser().getUsername() + ".");
+		this.owner.setGroup(this);
+		System.out.println("New group created by " + owner.getUser().getUsername() + ".");
 	}
 
 	public void ready(String uuid) {
@@ -45,7 +45,7 @@ public class Lobby {
 	public boolean allPlayersAreReady() {
 		for(GatewayRemoteClient player : getPlayers())
 		{
-			if(!playersReady.contains(player.getUser().getUUIDString())) return false;
+			if(player != owner && !playersReady.contains(player.getUser().getUUIDString())) return false;
 		}
 		return true;
 	}
@@ -121,11 +121,11 @@ public class Lobby {
 			this.whitelist.remove(client.getUser().getUUIDString());
 		}
 		this.players.add(client);
-		client.setLobby(this);
+		client.setGroup(this);
 		System.out.println(
-				client.getUser().getUsername() + " has just joined " + owner.getUser().getUsername() + " lobby.");
+				client.getUser().getUsername() + " has just joined " + owner.getUser().getUsername() + " group.");
 		try {
-			sendMessage(client.getUser().getUsername() + " has just joined the lobby.");
+			sendMessage(client.getUser().getUsername() + " has just joined the group.");
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
@@ -140,10 +140,10 @@ public class Lobby {
 			return false;
 		}
 		this.players.remove(client);
-		client.setLobby(null);
-		System.out.println(client.getUser().getUsername()+" has just been kicked from "+owner.getUser().getUsername()+" lobby.");
+		client.setGroup(null);
+		System.out.println(client.getUser().getUsername()+" has just been kicked from "+owner.getUser().getUsername()+" group.");
 		try {
-			sendMessage(client.getUser().getUsername() + " has just been kicked from the lobby");
+			sendMessage(client.getUser().getUsername() + " has just been kicked from the group");
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
@@ -156,11 +156,11 @@ public class Lobby {
 			return;
 		}
 		this.players.remove(client);
-		client.setLobby(null);
+		client.setGroup(null);
 		System.out.println(
-				client.getUser().getUsername() + " has just left " + owner.getUser().getUsername() + " lobby.");
+				client.getUser().getUsername() + " has just left " + owner.getUser().getUsername() + " group.");
 		try {
-			sendMessage(client.getUser().getUsername() + " has just left the lobby");
+			sendMessage(client.getUser().getUsername() + " has just left the group");
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
@@ -177,13 +177,13 @@ public class Lobby {
 		if(getPlayers() != null && getPlayers().size() > 0) {
 			for(GatewayRemoteClient remoteClient : getPlayers()) {
 				getPlayers().remove(remoteClient);
-				remoteClient.setLobby(null);
+				remoteClient.setGroup(null);
 			}	
 		}
-		System.out.println("Removed " + owner.getUser().getUsername() + " lobby.");
+		System.out.println("Removed " + owner.getUser().getUsername() + " group.");
 		
 		try {
-			sendMessage(owner.getUser().getUsername()+" has just removed the lobby");
+			sendMessage(owner.getUser().getUsername()+" has just removed the group");
 		} catch (IOException e) {
 			e.printStackTrace();
 		}

@@ -11,7 +11,7 @@ import isotopestudio.backdoor.core.server.configuration.GameServerConfiguration;
 import isotopestudio.backdoor.core.team.Team;
 import isotopestudio.backdoor.core.versus.Versus;
 import isotopestudio.backdoor.gateway.Gateway;
-import isotopestudio.backdoor.gateway.lobby.Lobby;
+import isotopestudio.backdoor.gateway.group.Group;
 import isotopestudio.backdoor.gateway.party.Party;
 import isotopestudio.backdoor.gateway.server.GatewayRemoteClient;
 
@@ -24,7 +24,7 @@ public class MatchmakingQueue {
 	private Versus versus;
 	private GameMode gameMode;
 	
-	private ArrayList<Lobby> waitings = new ArrayList<Lobby>();
+	private ArrayList<Group> waitings = new ArrayList<Group>();
 	
 	public MatchmakingQueue(Versus versus, GameMode gameMode) {
 		super();
@@ -33,13 +33,13 @@ public class MatchmakingQueue {
 	}
 
 	/**
-	 * @param lobby
+	 * @param lobby2
 	 */
-	public void join(Lobby lobby) {
+	public void join(Group group) {
 		int team_count = 2;
 		
 		@SuppressWarnings("unchecked")
-		ArrayList<Lobby>[] teams = new ArrayList[team_count];
+		ArrayList<Group>[] teams = new ArrayList[team_count];
 		
 		int[] count = new int[teams.length];
 		for(int i = 0; i < count.length; i++) {
@@ -48,26 +48,26 @@ public class MatchmakingQueue {
 		}
 		
 		int index = 0;
-		teams[index].add(lobby);
-		count[index] += lobby.getPlayers().size();
+		teams[index].add(group);
+		count[index] += group.getPlayers().size();
 		
-		if(lobby.getPlayers().size() == versus.getMaximum()) {
+		if(group.getPlayers().size() == versus.getMaximum()) {
 			index++;
 		}
 		
-		ArrayList<Lobby> waitings = new ArrayList<>();
+		ArrayList<Group> waitings = new ArrayList<>();
 		waitings.addAll(this.waitings);
 
-		System.out.println("[QUEUE] Currently in the queue there are "+waitings.size()+" lobbies");
-		for(Lobby lobbyInWaiting : waitings) {
-			if(lobbyInWaiting.getPlayers().size() - count[index] == versus.getMaximum()) {
-				teams[index].add(lobbyInWaiting);
+		System.out.println("[QUEUE] Currently in the queue there are "+waitings.size()+" groups");
+		for(Group groupInWaiting : waitings) {
+			if(groupInWaiting.getPlayers().size() - count[index] == versus.getMaximum()) {
+				teams[index].add(groupInWaiting);
 				count[index] = versus.getMaximum();
 				index++;
 				if(index == team_count)break;
 			} else {
-				teams[index].add(lobbyInWaiting);
-				count[index] += lobbyInWaiting.getPlayers().size();
+				teams[index].add(groupInWaiting);
+				count[index] += groupInWaiting.getPlayers().size();
 			}
 		}
 		
@@ -80,13 +80,13 @@ public class MatchmakingQueue {
 			ArrayList<GatewayRemoteClient> players = new ArrayList<>();
 			
 			for(int i = 0; i < teams.length; i++) {
-				for(Lobby lobby_ : teams[i]) {
-					if(waitings.contains(lobby_)) 
-						waitings.remove(lobby_);
-					if (lobby_.getQueue() != null)
-						lobby_.setQueue(null);
+				for(Group group_ : teams[i]) {
+					if(waitings.contains(group_)) 
+						waitings.remove(group_);
+					if (group_.getQueue() != null)
+						group_.setQueue(null);
 					
-					for(GatewayRemoteClient remoteClient : lobby_.getPlayers()) {
+					for(GatewayRemoteClient remoteClient : group_.getPlayers()) {
 						String uuid = remoteClient.getUser().getUUIDString();
 						configuration.getWhitelist().add(uuid);
 						configuration.getTeamAssigned().put(uuid, Team.values()[i]);	
@@ -109,23 +109,23 @@ public class MatchmakingQueue {
 			return;
 		}
 
-		this.waitings.add(lobby);
-		lobby.setQueue(this);
-		System.out.println("[QUEUE] "+lobby.getOwner().getUser().getUsername()+"'s lobby is in the queue.");
+		this.waitings.add(group);
+		group.setQueue(this);
+		System.out.println("[QUEUE] "+group.getOwner().getUser().getUsername()+"'s group is in the queue.");
 	}
 
 	/**
-	 * @param lobby
+	 * @param lobby2
 	 */
-	public void leave(Lobby lobby) {
-		waitings.remove(lobby);
-		lobby.setQueue(null);
+	public void leave(Group group) {
+		waitings.remove(group);
+		group.setQueue(null);
 	}
 	
 	/**
 	 * @return the waitings
 	 */
-	public ArrayList<Lobby> getWaitings() {
+	public ArrayList<Group> getWaitings() {
 		return waitings;
 	}
 	

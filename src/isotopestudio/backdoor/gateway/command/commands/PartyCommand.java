@@ -1,18 +1,13 @@
 package isotopestudio.backdoor.gateway.command.commands;
 
-import java.io.BufferedReader;
 import java.io.IOException;
-import java.io.InputStreamReader;
-import java.net.InetAddress;
-import java.net.URL;
 
 import isotopestudio.backdoor.core.gamemode.GameMode;
 import isotopestudio.backdoor.core.server.configuration.GameServerConfiguration;
 import isotopestudio.backdoor.core.versus.Versus;
 import isotopestudio.backdoor.gateway.Gateway;
 import isotopestudio.backdoor.gateway.command.ICommand;
-import isotopestudio.backdoor.gateway.lobby.Lobby;
-import isotopestudio.backdoor.gateway.packet.packets.PacketClientConnectToServer;
+import isotopestudio.backdoor.gateway.group.Group;
 import isotopestudio.backdoor.gateway.party.Party;
 import isotopestudio.backdoor.gateway.server.GatewayRemoteClient;
 
@@ -46,25 +41,25 @@ public class PartyCommand extends ICommand {
 				e.printStackTrace();
 			}
 		} else if (args.length == 1) {
-			if (!remoteclient.hasLobby()) {
+			if (!remoteclient.hasGroup()) {
 				try {
-					remoteclient.sendChatMessage("[ERROR] You are not in any lobby!");
+					remoteclient.sendChatMessage("[ERROR] You are not in any group!");
 				} catch (IOException e) {
 					e.printStackTrace();
 				}
 				return;
 			}
-			Lobby lobby = remoteclient.getLobby();
+			Group group = remoteclient.getGroup();
 			if (args[0].equalsIgnoreCase("start")) {
-				if (lobby.getOwner() != remoteclient) {
+				if (group.getOwner() != remoteclient) {
 					try {
-						remoteclient.sendChatMessage("[ERROR] You are not the head of the lobby!");
+						remoteclient.sendChatMessage("[ERROR] You are not the head of the group!");
 					} catch (IOException e) {
 						e.printStackTrace();
 					}
 					return;
 				}
-				if (!lobby.allPlayersAreReady()) {
+				if (!group.allPlayersAreReady()) {
 					try {
 						remoteclient.sendChatMessage("[ERROR] Not all players are ready!");
 					} catch (IOException e) {
@@ -72,7 +67,7 @@ public class PartyCommand extends ICommand {
 					}
 					return;
 				}
-				if (!lobby.allPlayersAreAvailable()) {
+				if (!group.allPlayersAreAvailable()) {
 					try {
 						remoteclient.sendChatMessage("[ERROR] Not all players are ready!");
 					} catch (IOException e) {
@@ -81,7 +76,7 @@ public class PartyCommand extends ICommand {
 					return;
 				}
 				for (Versus versus : Versus.values()) {
-					if ((lobby.getPlayers().size() / 2) == versus.getMaximum()) {
+					if ((group.getPlayers().size() / 2) == versus.getMaximum()) {
 						GameServerConfiguration configuration = new GameServerConfiguration(Gateway.generatePort(),
 								null, false, GameMode.DOMINATION, versus, null, null, null, null, true);
 						Party party = new Party(configuration);
@@ -99,7 +94,7 @@ public class PartyCommand extends ICommand {
 						}
 						party.start();
 						try {
-							party.connect(lobby.getPlayers());
+							party.connect(group.getPlayers());
 							remoteclient.sendChatMessage("[SUCCESS] The game has been launched correctly!");
 						} catch (IOException exception) {
 							exception.printStackTrace();
@@ -107,21 +102,21 @@ public class PartyCommand extends ICommand {
 					}
 				}
 			} else if (args[0].equals("ready")) {
-				lobby.ready(remoteclient.getUser().getUUIDString());
+				group.ready(remoteclient.getUser().getUUIDString());
 				try {
 					remoteclient.sendChatMessage("You are ready.");
 				} catch (IOException e) {
 					e.printStackTrace();
 				}
 			} else if (args[0].equals("unready")) {
-				lobby.unready(remoteclient.getUser().getUUIDString());
+				group.unready(remoteclient.getUser().getUUIDString());
 				try {
 					remoteclient.sendChatMessage("You are no longer ready.");
 				} catch (IOException e) {
 					e.printStackTrace();
 				}
 			} else if (args[0].equals("stop")) {
-				if (lobby.getOwner() != remoteclient) {
+				if (group.getOwner() != remoteclient) {
 					try {
 						remoteclient.sendChatMessage("[ERROR] You are not the head of the lobby!");
 					} catch (IOException e) {
@@ -134,19 +129,19 @@ public class PartyCommand extends ICommand {
 				
 				Versus versus = null;
 				for(Versus versus_ : Versus.values()) {
-					if(lobby.getPlayers().size() == versus_.getMaximum()) {
+					if(group.getPlayers().size() == versus_.getMaximum()) {
 						versus = versus_;
 					}
 				}
-				if (lobby.getOwner() != remoteclient) {
+				if (group.getOwner() != remoteclient) {
 					try {
-						remoteclient.sendChatMessage("[ERROR] You are not the head of the lobby!");
+						remoteclient.sendChatMessage("[ERROR] You are not the head of the group!");
 					} catch (IOException e) {
 						e.printStackTrace();
 					}
 					return;
 				}
-				if (!lobby.allPlayersAreReady()) {
+				if (!group.allPlayersAreReady()) {
 					try {
 						remoteclient.sendChatMessage("[ERROR] Not all players are ready!");
 					} catch (IOException e) {
@@ -154,7 +149,7 @@ public class PartyCommand extends ICommand {
 					}
 					return;
 				}
-				if (!lobby.allPlayersAreAvailable()) {
+				if (!group.allPlayersAreAvailable()) {
 					try {
 						remoteclient.sendChatMessage("[ERROR] Not all players are ready!");
 					} catch (IOException e) {
@@ -163,7 +158,7 @@ public class PartyCommand extends ICommand {
 					return;
 				}
 				
-				if(lobby.getQueue() != null) {
+				if(group.getQueue() != null) {
 					try {
 						remoteclient.sendChatMessage("[ERROR] You are already in a queue!");
 					} catch (IOException e) {
@@ -172,14 +167,14 @@ public class PartyCommand extends ICommand {
 					return;
 				}
 
-				Gateway.getMatchmaking().joinMatchmakingQueue(lobby, versus, gameMode);
+				Gateway.getMatchmaking().joinMatchmakingQueue(group, versus, gameMode);
 				try {
-					lobby.sendMessage("Your lobby is in the queue in "+(gameMode.toString().substring(0, 1).toUpperCase() + gameMode.toString().substring(1).toLowerCase())+" for "+versus.getText()+".");
+					group.sendMessage("Your lobby is in the queue in "+(gameMode.toString().substring(0, 1).toUpperCase() + gameMode.toString().substring(1).toLowerCase())+" for "+versus.getText()+".");
 				} catch (IOException e) {
 					e.printStackTrace();
 				}
 			} else if (args[0].equals("cancelsearch")) {
-				if(lobby.getQueue() == null) {
+				if(group.getQueue() == null) {
 					try {
 						remoteclient.sendChatMessage("[ERROR] You are not in any queue!");
 					} catch (IOException e) {
@@ -188,9 +183,9 @@ public class PartyCommand extends ICommand {
 					return;
 				}
 				
-				lobby.getQueue().leave(lobby);
+				group.getQueue().leave(group);
 				try {
-					lobby.sendMessage("Your lobby is no longer in the queue.");
+					group.sendMessage("Your lobby is no longer in the queue.");
 				} catch (IOException e) {
 					e.printStackTrace();
 				}

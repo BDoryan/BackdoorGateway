@@ -5,7 +5,6 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.net.Socket;
-import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Properties;
@@ -20,7 +19,7 @@ import doryanbessiere.isotopestudio.commons.logger.Logger;
 import doryanbessiere.isotopestudio.commons.logger.file.LoggerFile;
 import doryanbessiere.isotopestudio.commons.mysql.SQL;
 import doryanbessiere.isotopestudio.commons.mysql.SQLDatabase;
-import isotopestudio.backdoor.gateway.lobby.Lobby;
+import isotopestudio.backdoor.gateway.group.Group;
 import isotopestudio.backdoor.gateway.matckmaking.Matchmaking;
 import isotopestudio.backdoor.gateway.packet.packets.PacketClientChatMessage;
 import isotopestudio.backdoor.gateway.party.Party;
@@ -131,22 +130,22 @@ public class Gateway {
 		return port;
 	}
 	
-	public static ArrayList<Lobby> lobbies = new ArrayList<>();
+	public static ArrayList<Group> groups = new ArrayList<>();
 	
 	/**
 	 * @return the lobbies
 	 */
-	public static ArrayList<Lobby> getLobbies() {
-		return lobbies;
+	public static ArrayList<Group> getLobbies() {
+		return groups;
 	}
 
 	/**
 	 * @return the copy lobbies
 	 */
-	public static ArrayList<Lobby> getCopyLobbies() {
-		ArrayList<Lobby> lobbies = new ArrayList<>();
-		lobbies.addAll(Gateway.lobbies);
-		return lobbies;
+	public static ArrayList<Group> getCopyLobbies() {
+		ArrayList<Group> groups = new ArrayList<>();
+		groups.addAll(Gateway.groups);
+		return groups;
 	}
 	
 	/**

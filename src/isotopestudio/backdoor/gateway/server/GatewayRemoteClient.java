@@ -12,7 +12,7 @@ import doryanbessiere.isotopestudio.api.authentification.User;
 import doryanbessiere.isotopestudio.api.profile.Profile;
 import doryanbessiere.isotopestudio.commons.mysql.SQLDatabase;
 import isotopestudio.backdoor.gateway.Gateway;
-import isotopestudio.backdoor.gateway.lobby.Lobby;
+import isotopestudio.backdoor.gateway.group.Group;
 import isotopestudio.backdoor.gateway.packet.Packet;
 import isotopestudio.backdoor.gateway.packet.packets.PacketClientChatMessage;
 import isotopestudio.backdoor.gateway.packet.packets.PacketClientDisconnected;
@@ -34,7 +34,7 @@ public class GatewayRemoteClient extends Thread {
 	private boolean connected;
 	private boolean authenticated;
 
-	private Lobby lobby;
+	private Group group;
 	private Party party;
 
 	public void connect(Socket socket) throws IOException, SQLException {
@@ -110,11 +110,11 @@ public class GatewayRemoteClient extends Thread {
 	}
 
 	public void disconnected() {
-		if (hasLobby()) {
-			if (getLobby().getOwner().equals(this)) {
-				getLobby().destroy();
+		if (hasGroup()) {
+			if (getGroup().getOwner().equals(this)) {
+				getGroup().destroy();
 			} else {
-				getLobby().leave(this);
+				getGroup().leave(this);
 			}
 		}
 
@@ -242,31 +242,31 @@ public class GatewayRemoteClient extends Thread {
 	}
 
 	/**
-	 * @param lobby the lobby to set
+	 * @param Group2 the Group to set
 	 */
-	public void setLobby(Lobby lobby) {
-		this.lobby = lobby;
+	public void setGroup(Group group) {
+		this.group = group;
 	}
 
 	/**
-	 * @param lobby2
+	 * @param Group2
 	 */
-	public void invite(Lobby lobby) {
-		lobby.whitelist(getUser().getUUIDString());
+	public void invite(Group group) {
+		group.whitelist(getUser().getUUIDString());
 	}
 
 	/**
-	 * @return the lobby
+	 * @return the Group
 	 */
-	public Lobby getLobby() {
-		return lobby;
+	public Group getGroup() {
+		return group;
 	}
 
 	/**
-	 * @return true if you are in a lobby
+	 * @return true if you are in a Group
 	 */
-	public boolean hasLobby() {
-		return lobby != null;
+	public boolean hasGroup() {
+		return group != null;
 	}
 
 	/**

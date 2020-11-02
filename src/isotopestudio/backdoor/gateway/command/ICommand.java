@@ -1,8 +1,6 @@
 package isotopestudio.backdoor.gateway.command;
 
-import java.util.Scanner;
-
-import isotopestudio.backdoor.gateway.command.commands.LobbyCommand;
+import isotopestudio.backdoor.gateway.command.commands.GroupCommand;
 import isotopestudio.backdoor.gateway.command.commands.NotificationCommand;
 import isotopestudio.backdoor.gateway.command.commands.PartyCommand;
 import isotopestudio.backdoor.gateway.server.GatewayRemoteClient;
@@ -14,7 +12,7 @@ import isotopestudio.backdoor.gateway.server.GatewayRemoteClient;
 public abstract class ICommand {
 	public static ICommand[] commands = new ICommand[] {
 		new NotificationCommand(),
-		new LobbyCommand(),
+		new GroupCommand(),
 		new PartyCommand()
 	};
 
