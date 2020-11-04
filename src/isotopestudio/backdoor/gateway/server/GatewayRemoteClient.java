@@ -59,9 +59,14 @@ public class GatewayRemoteClient extends Thread {
 				if (database.has("users", "email", authentification[1])) {
 					if (database.getString("users", "email", authentification[1], "token")
 							.equals(authentification[2])) {
+						UUID uuidString = UUID.fromString(database.getString("users", "email", authentification[1], "uuid"));
+						if(Gateway.getGatewayServer().getClient(uuidString) != null) {
+							kick("user_already_connected");
+							return;
+						}
 						authenticated = true;
 						this.user = User.fromJson(database.getString("users_data", "uuid",
-								database.getString("users", "email", authentification[1], "uuid"), "json"));
+								uuidString.toString(), "json"));
 						Gateway.getGatewayServer().clients.add(this);
 						connected();
 						return;
