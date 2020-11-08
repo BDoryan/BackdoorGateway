@@ -2,11 +2,11 @@ package isotopestudio.backdoor.gateway.group;
 
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.UUID;
 
 import isotopestudio.backdoor.gateway.Gateway;
 import isotopestudio.backdoor.gateway.matckmaking.MatchmakingQueue;
+import isotopestudio.backdoor.gateway.packet.packets.group.PacketGroupUpdate;
 import isotopestudio.backdoor.gateway.server.GatewayRemoteClient;
 
 /**
@@ -15,6 +15,8 @@ import isotopestudio.backdoor.gateway.server.GatewayRemoteClient;
  */
 public class Group {
 
+	private UUID uuid;
+	
 	private GatewayRemoteClient owner;
 	private boolean isPrivate = true;
 
@@ -25,6 +27,7 @@ public class Group {
 	private MatchmakingQueue queue;
 
 	public Group(GatewayRemoteClient owner, boolean isPrivate) {
+		this.uuid = UUID.randomUUID();
 		this.owner = owner;
 		this.isPrivate = isPrivate;
 		this.players.add(owner);
@@ -36,6 +39,13 @@ public class Group {
 
 	public void ready(String uuid) {
 		playersReady.add(uuid);
+		update();
+	}
+	
+	public void unready(String uuid) {
+		if(owner.getUser().getUUIDString().equals(uuid))return;
+		playersReady.remove(uuid);
+		update();
 	}
 
 	public boolean isReady(String uuid) {
@@ -58,18 +68,16 @@ public class Group {
 		return true;
 	}
 	
-	public void unready(String uuid) {
-		playersReady.remove(uuid);
-	}
-	
 	public void whitelist(UUID uuid) {
 		whitelist(uuid.toString());
+		update();
 	}
 
 	public void whitelist(String uuidString) {
 		if (!isPrivate())
 			setPrivate(true);
 		whitelist.add(uuidString);
+		update();
 	}
 
 	public void unwhitelist(UUID uuid) {
@@ -78,6 +86,20 @@ public class Group {
 
 	public void unwhitelist(String uuidString) {
 		whitelist.remove(uuidString);
+		update();
+	}
+	
+	public GroupObject getGroupObject() {
+		GroupObject groupObject = new GroupObject(getUUID().toString(), owner.getProfile(), isPrivate);
+		groupObject.getPlayersReady().addAll(playersReady);
+		groupObject.getWhitelist().addAll(whitelist);
+		getPlayers().forEach((remoteClient) -> groupObject.getPlayers().add(remoteClient.getProfile()));
+		
+		return groupObject;
+	}
+	
+	public void update() {
+		getPlayers().forEach((remoteClient) -> remoteClient.updateGroup(this));
 	}
 	
 	/**
@@ -121,6 +143,8 @@ public class Group {
 			this.whitelist.remove(client.getUser().getUUIDString());
 		}
 		this.players.add(client);
+		update();
+		
 		client.setGroup(this);
 		System.out.println(
 				client.getUser().getUsername() + " has just joined " + owner.getUser().getUsername() + " group.");
@@ -140,6 +164,8 @@ public class Group {
 			return false;
 		}
 		this.players.remove(client);
+		update();
+		
 		client.setGroup(null);
 		System.out.println(client.getUser().getUsername()+" has just been kicked from "+owner.getUser().getUsername()+" group.");
 		try {
@@ -156,6 +182,8 @@ public class Group {
 			return;
 		}
 		this.players.remove(client);
+		update();
+		
 		client.setGroup(null);
 		System.out.println(
 				client.getUser().getUsername() + " has just left " + owner.getUser().getUsername() + " group.");
@@ -215,5 +243,12 @@ public class Group {
 	 */
 	public GatewayRemoteClient getOwner() {
 		return owner;
+	}
+	
+	/**
+	 * @return the uuid
+	 */
+	public UUID getUUID() {
+		return uuid;
 	}
 }

@@ -4,19 +4,20 @@ import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
 import java.net.Socket;
-import java.net.SocketException;
 import java.sql.SQLException;
 import java.util.UUID;
 
-import doryanbessiere.isotopestudio.api.authentification.User;
 import doryanbessiere.isotopestudio.api.profile.Profile;
+import doryanbessiere.isotopestudio.api.user.User;
 import doryanbessiere.isotopestudio.commons.mysql.SQLDatabase;
 import isotopestudio.backdoor.gateway.Gateway;
 import isotopestudio.backdoor.gateway.group.Group;
+import isotopestudio.backdoor.gateway.group.GroupObject;
 import isotopestudio.backdoor.gateway.packet.Packet;
 import isotopestudio.backdoor.gateway.packet.packets.PacketClientChatMessage;
 import isotopestudio.backdoor.gateway.packet.packets.PacketClientDisconnected;
 import isotopestudio.backdoor.gateway.packet.packets.PacketClientReceiveNotification;
+import isotopestudio.backdoor.gateway.packet.packets.group.PacketGroupUpdate;
 import isotopestudio.backdoor.gateway.party.Party;
 
 /**
@@ -81,6 +82,15 @@ public class GatewayRemoteClient extends Thread {
 		}
 	}
 
+	public void updateGroup(Group group) {
+		GroupObject groupObject = (group == null ? null : group.getGroupObject());
+		try {
+			sendPacket(new PacketGroupUpdate(groupObject));
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+	}
+	
 	public void sendChatMessage(String message) throws IOException {
 		Profile profile = new Profile(UUID.randomUUID().toString(), "SERVER", true, null);
 		sendPacket(new PacketClientChatMessage(profile, System.currentTimeMillis(), message.isEmpty() ? " " : message));
@@ -131,6 +141,11 @@ public class GatewayRemoteClient extends Thread {
 		} catch (Exception e) {
 		}
 		setConnected(false);
+	}
+	
+	public Profile getProfile() {
+		Profile profile = new Profile(user.getUUIDString(), user.getUsername(), true, Gateway.URL_PROFILE_PATERN.replace("%uuid%", user.getUUIDString()));
+		return profile;
 	}
 
 	public void sendData(String data) throws IOException {
@@ -186,7 +201,9 @@ public class GatewayRemoteClient extends Thread {
 		try {
 			if (!socket.isClosed())
 				socket.close();
+			if(input != null)
 			input.close();
+			if(output != null)
 			output.close();
 		} catch (IOException e) {
 			e.printStackTrace();
@@ -251,6 +268,7 @@ public class GatewayRemoteClient extends Thread {
 	 */
 	public void setGroup(Group group) {
 		this.group = group;
+		updateGroup(group);
 	}
 
 	/**
@@ -290,5 +308,17 @@ public class GatewayRemoteClient extends Thread {
 	 */
 	public void sendNotification(String image_path, String title, String message) throws IOException {
 		sendPacket(new PacketClientReceiveNotification(image_path, title, message));
+	}
+
+	/**
+	 * @param image_path
+	 * @param title
+	 * @param message
+	 * @param duration
+	 * 
+	 * @throws IOException
+	 */
+	public void sendNotification(String image_path, String title, String message, int duration) throws IOException {
+		sendPacket(new PacketClientReceiveNotification(image_path, title, message, duration));
 	}
 }

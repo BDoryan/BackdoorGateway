@@ -4,8 +4,8 @@ import java.io.IOException;
 
 import org.apache.http.client.ClientProtocolException;
 
-import doryanbessiere.isotopestudio.api.authentification.User;
 import doryanbessiere.isotopestudio.api.profile.Profile;
+import doryanbessiere.isotopestudio.api.user.User;
 import isotopestudio.backdoor.gateway.Gateway;
 import isotopestudio.backdoor.gateway.command.ICommand;
 import isotopestudio.backdoor.gateway.packet.Packet;

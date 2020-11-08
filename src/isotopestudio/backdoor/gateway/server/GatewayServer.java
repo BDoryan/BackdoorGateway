@@ -12,7 +12,6 @@ import java.util.UUID;
 import doryanbessiere.isotopestudio.api.IsotopeStudioAPI;
 import isotopestudio.backdoor.gateway.Gateway;
 import isotopestudio.backdoor.gateway.packet.Packet;
-import isotopestudio.backdoor.gateway.packet.packets.PacketClientReceiveNotification;
 
 /**
  * @author BESSIERE

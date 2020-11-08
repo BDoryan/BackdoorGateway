@@ -30,6 +30,8 @@ import isotopestudio.backdoor.gateway.server.GatewayServer;
  * @github https://www.github.com/DoryanBessiere/
  */
 public class Gateway {
+	
+	public static final String URL_PROFILE_PATERN = "https://isotope-studio.fr/server/api/users/%uuid%/profile.png";
 
 	private static Properties configuration = new Properties();
 	public static String version = null;

@@ -1,13 +1,5 @@
 package isotopestudio.backdoor.gateway.packet.packets;
 
-import java.io.IOException;
-
-import org.apache.http.client.ClientProtocolException;
-
-import doryanbessiere.isotopestudio.api.authentification.User;
-import doryanbessiere.isotopestudio.api.profile.Profile;
-import isotopestudio.backdoor.gateway.Gateway;
-import isotopestudio.backdoor.gateway.command.ICommand;
 import isotopestudio.backdoor.gateway.packet.Packet;
 import isotopestudio.backdoor.gateway.server.GatewayRemoteClient;
 import isotopestudio.backdoor.gateway.server.GatewayServer;
@@ -21,13 +13,24 @@ public class PacketClientReceiveNotification extends Packet {
 	private String image_path;
 	private String title;
 	private String message;
-	
-	public PacketClientReceiveNotification(String image_path, String title, String message) {
-		super(CLIENT_RECEIVE_NOTIFICATION, image_path, title, message);
+	private int duration;
+
+	public PacketClientReceiveNotification(String image_path, String title, String message, int duration) {
+		super(CLIENT_RECEIVE_NOTIFICATION, image_path, title, message, duration);
 		
 		this.image_path = image_path;
 		this.title = title;
 		this.message = message;
+		this.duration = duration;
+	}
+
+	public PacketClientReceiveNotification(String image_path, String title, String message) {
+		super(CLIENT_RECEIVE_NOTIFICATION, image_path, title, message, 10);
+		
+		this.image_path = image_path;
+		this.title = title;
+		this.message = message;
+		this.duration = 10;
 	}
 	
 	/**
@@ -49,6 +52,13 @@ public class PacketClientReceiveNotification extends Packet {
 	 */
 	public String getTitle() {
 		return title;
+	}
+	
+	/**
+	 * @return the duration
+	 */
+	public int getDuration() {
+		return duration;
 	}
 
 	/**

@@ -5,6 +5,10 @@ import isotopestudio.backdoor.gateway.packet.packets.PacketClientChatMessages;
 import isotopestudio.backdoor.gateway.packet.packets.PacketClientConnectToServer;
 import isotopestudio.backdoor.gateway.packet.packets.PacketClientDisconnected;
 import isotopestudio.backdoor.gateway.packet.packets.PacketClientReceiveNotification;
+import isotopestudio.backdoor.gateway.packet.packets.group.PacketGroupCreate;
+import isotopestudio.backdoor.gateway.packet.packets.group.PacketGroupDelete;
+import isotopestudio.backdoor.gateway.packet.packets.group.PacketGroupLeave;
+import isotopestudio.backdoor.gateway.packet.packets.group.PacketGroupUpdate;
 import isotopestudio.backdoor.gateway.server.GatewayRemoteClient;
 import isotopestudio.backdoor.gateway.server.GatewayServer;
 
@@ -17,13 +21,21 @@ public abstract class Packet {
 	public static final int CLIENT_CHAT_MESSAGES = 3;
 	public static final int CLIENT_RECEIVE_NOTIFICATION = 4;
 	public static final int CLIENT_CONNECT_TO_SERVER = 5;
+	public static final int GROUP_UPDATE = 6;
+	public static final int GROUP_CREATE = 7;
+	public static final int GROUP_DELETE = 8;
+	public static final int GROUP_LEAVE = 9;
 
-	public static Packet[] packets = new Packet[] {null, 
+	public static Packet[] packets = new Packet[] { null,
 		new PacketClientDisconnected(),
 		new PacketClientChatMessage(),
 		new PacketClientChatMessages(),
 		new PacketClientReceiveNotification(),
-		new PacketClientConnectToServer()
+		new PacketClientConnectToServer(),
+		new PacketGroupUpdate(),
+		new PacketGroupCreate(),
+		new PacketGroupDelete(),
+		new PacketGroupLeave(),
 	};
 
 	public static Packet parsePacket(String data) {

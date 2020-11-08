@@ -4,7 +4,7 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>isotopestudio.backdoor.gateway</groupId>
 	<artifactId>gateway</artifactId>
-	<version>0.0.78-SNAPSHOT</version>
+	<version>0.0.79-SNAPSHOT</version>
 	<build>
 		<sourceDirectory>src</sourceDirectory>
 		<resources>
@@ -55,7 +55,7 @@
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-resources-plugin</artifactId>
-				<version>3.1.0</version>
+				<version>3.2.0</version>
 			</plugin>
 			<plugin>
 				<artifactId>maven-compiler-plugin</artifactId>
@@ -115,7 +115,7 @@
 		<dependency>
 			<groupId>isotopestudio.backdoor.core</groupId>
 			<artifactId>backdoorcore</artifactId>
-			<version>1.0.29</version>
+			<version>1.0.31</version>
 		</dependency>
 		<dependency>
 			<groupId>mysql</groupId> 
@@ -125,7 +125,7 @@
 		<dependency>
 			<groupId>doryanbessiere.isotopestudio.api</groupId>
 			<artifactId>isotopestudioapi</artifactId>
-			<version>1.1.34</version>
+			<version>1.1.39</version>
 		</dependency>
 		<dependency>
 			<groupId>isotopestudio.backdoor.network</groupId>
