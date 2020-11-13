@@ -5,9 +5,15 @@ import isotopestudio.backdoor.gateway.packet.packets.PacketClientChatMessages;
 import isotopestudio.backdoor.gateway.packet.packets.PacketClientConnectToServer;
 import isotopestudio.backdoor.gateway.packet.packets.PacketClientDisconnected;
 import isotopestudio.backdoor.gateway.packet.packets.PacketClientReceiveNotification;
+import isotopestudio.backdoor.gateway.packet.packets.group.PacketGroupAccept;
 import isotopestudio.backdoor.gateway.packet.packets.group.PacketGroupCreate;
 import isotopestudio.backdoor.gateway.packet.packets.group.PacketGroupDelete;
+import isotopestudio.backdoor.gateway.packet.packets.group.PacketGroupInvite;
+import isotopestudio.backdoor.gateway.packet.packets.group.PacketGroupKick;
 import isotopestudio.backdoor.gateway.packet.packets.group.PacketGroupLeave;
+import isotopestudio.backdoor.gateway.packet.packets.group.PacketGroupReady;
+import isotopestudio.backdoor.gateway.packet.packets.group.PacketGroupSet;
+import isotopestudio.backdoor.gateway.packet.packets.group.PacketGroupStart;
 import isotopestudio.backdoor.gateway.packet.packets.group.PacketGroupUpdate;
 import isotopestudio.backdoor.gateway.server.GatewayRemoteClient;
 import isotopestudio.backdoor.gateway.server.GatewayServer;
@@ -25,6 +31,12 @@ public abstract class Packet {
 	public static final int GROUP_CREATE = 7;
 	public static final int GROUP_DELETE = 8;
 	public static final int GROUP_LEAVE = 9;
+	public static final int GROUP_SET = 10;
+	public static final int GROUP_INVITE = 11;
+	public static final int GROUP_KICK = 12;
+	public static final int GROUP_ACCEPT = 13;
+	public static final int GROUP_READY = 14;
+	public static final int GROUP_START = 15;
 
 	public static Packet[] packets = new Packet[] { null,
 		new PacketClientDisconnected(),
@@ -36,6 +48,12 @@ public abstract class Packet {
 		new PacketGroupCreate(),
 		new PacketGroupDelete(),
 		new PacketGroupLeave(),
+		new PacketGroupSet(),
+		new PacketGroupInvite(),
+		new PacketGroupKick(),
+		new PacketGroupAccept(),
+		new PacketGroupReady(),
+		new PacketGroupStart()
 	};
 
 	public static Packet parsePacket(String data) {

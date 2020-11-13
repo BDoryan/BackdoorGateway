@@ -4,9 +4,11 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.UUID;
 
+import isotopestudio.backdoor.core.gamemode.GameMode;
+import isotopestudio.backdoor.core.versus.Versus;
 import isotopestudio.backdoor.gateway.Gateway;
 import isotopestudio.backdoor.gateway.matckmaking.MatchmakingQueue;
-import isotopestudio.backdoor.gateway.packet.packets.group.PacketGroupUpdate;
+import isotopestudio.backdoor.gateway.packet.packets.PacketClientReceiveNotification;
 import isotopestudio.backdoor.gateway.server.GatewayRemoteClient;
 
 /**
@@ -25,7 +27,10 @@ public class Group {
 	private ArrayList<String> playersReady = new ArrayList<>();
 
 	private MatchmakingQueue queue;
-
+	
+	private GameMode gamemode = GameMode.DOMINATION;
+	private Versus versus = Versus.ONEvsONE;
+	
 	public Group(GatewayRemoteClient owner, boolean isPrivate) {
 		this.uuid = UUID.randomUUID();
 		this.owner = owner;
@@ -70,12 +75,9 @@ public class Group {
 	
 	public void whitelist(UUID uuid) {
 		whitelist(uuid.toString());
-		update();
 	}
 
 	public void whitelist(String uuidString) {
-		if (!isPrivate())
-			setPrivate(true);
 		whitelist.add(uuidString);
 		update();
 	}
@@ -89,8 +91,27 @@ public class Group {
 		update();
 	}
 	
+	public void setPrivate(boolean isPrivate) {
+		this.isPrivate = isPrivate;
+		update();
+	}
+	
+	/**
+	 * @return the versus
+	 */
+	public Versus getVersus() {
+		return versus;
+	}
+	
+	/**
+	 * @return the gamemode
+	 */
+	public GameMode getGamemode() {
+		return gamemode;
+	}
+	
 	public GroupObject getGroupObject() {
-		GroupObject groupObject = new GroupObject(getUUID().toString(), owner.getProfile(), isPrivate);
+		GroupObject groupObject = new GroupObject(gamemode, versus, getUUID().toString(), owner.getProfile(), isPrivate);
 		groupObject.getPlayersReady().addAll(playersReady);
 		groupObject.getWhitelist().addAll(whitelist);
 		getPlayers().forEach((remoteClient) -> groupObject.getPlayers().add(remoteClient.getProfile()));
@@ -136,12 +157,10 @@ public class Group {
 	}
 
 	public boolean join(GatewayRemoteClient client) {
-		if (isPrivate() && !whitelist.contains(client.getUser().getUUIDString())) {
+		if (!whitelist.contains(client.getUser().getUUIDString())) {
 			return false;
 		}
-		if(isPrivate() && whitelist.contains(client.getUser().getUUIDString())) {
-			this.whitelist.remove(client.getUser().getUUIDString());
-		}
+		this.whitelist.remove(client.getUser().getUUIDString());
 		this.players.add(client);
 		update();
 		
@@ -170,6 +189,7 @@ public class Group {
 		System.out.println(client.getUser().getUsername()+" has just been kicked from "+owner.getUser().getUsername()+" group.");
 		try {
 			sendMessage(client.getUser().getUsername() + " has just been kicked from the group");
+			client.sendPacket(new PacketClientReceiveNotification("group_kick", "lang:group_you_have_been_kicked_title", "lang:group_you_have_been_kicked_message"));
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
@@ -183,6 +203,10 @@ public class Group {
 		}
 		this.players.remove(client);
 		update();
+		
+		if(isReady(client.getUser().getUUIDString())) {
+			playersReady.remove(client.getUser().getUUIDString());
+		}
 		
 		client.setGroup(null);
 		System.out.println(
@@ -206,6 +230,11 @@ public class Group {
 			for(GatewayRemoteClient remoteClient : getPlayers()) {
 				getPlayers().remove(remoteClient);
 				remoteClient.setGroup(null);
+				try {
+					remoteClient.sendPacket(new PacketClientReceiveNotification("group_deleted", "lang:group_your_group_has_been_deleted_title", "lang:group_your_group_has_been_deleted_message"));
+				} catch (IOException e) {
+					e.printStackTrace();
+				}
 			}	
 		}
 		System.out.println("Removed " + owner.getUser().getUsername() + " group.");
@@ -225,13 +254,6 @@ public class Group {
 	}
 	
 	/**
-	 * @param isPrivate the private to set
-	 */
-	public void setPrivate(boolean isPrivate) {
-		this.isPrivate = isPrivate;
-	}
-
-	/**
 	 * @return true if the is in private also false
 	 */
 	public boolean isPrivate() {
@@ -250,5 +272,32 @@ public class Group {
 	 */
 	public UUID getUUID() {
 		return uuid;
+	}
+
+	/**
+	 * @return
+	 */
+	public boolean isOverload() {
+		return isPrivate ? getPlayers().size() > (versus.getMaximum() + versus.getMaximum()) : (getPlayers().size() > versus.getMaximum());
+	}
+
+	/**
+	 * @return
+	 */
+	public boolean isFull() {
+		return isPrivate ? getPlayers().size() >= (versus.getMaximum() + versus.getMaximum()) : getPlayers().size() >= versus.getMaximum() ;
+	}
+
+	/**
+	 * @param isPrivate2
+	 * @param versus2
+	 * @param gamemode2
+	 */
+	public void set(boolean isPrivate, Versus versus, GameMode gamemode) {
+		System.out.println(isPrivate+", "+versus.getText()+", "+gamemode.toString());
+		this.isPrivate = isPrivate;
+		this.versus = versus;
+		this.gamemode = gamemode;
+		update();
 	}
 }

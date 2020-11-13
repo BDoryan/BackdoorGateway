@@ -31,17 +31,11 @@ public class PacketGroupCreate extends Packet {
 		if(!client.hasGroup()) {
 			new Group(client, true);
 		} else {
-			sendError(client, "lang:group_you_are_already_in_a_group_dialog_title", "lang:group_you_are_already_in_a_group_dialog_message");
-		}
-	}
-
-	private void sendError(GatewayRemoteClient client, String title, String message) {
-		client.getGroup().getPlayers().forEach((remoteplayer) -> {
 			try {
-				remoteplayer.sendNotification("error", title, message);
+				client.sendNotification("error", "lang:group_you_are_already_in_a_group_dialog_title", "lang:group_you_are_already_in_a_group_dialog_message");
 			} catch (IOException e) {
 				e.printStackTrace();
 			}
-		});
+		}
 	}
 }

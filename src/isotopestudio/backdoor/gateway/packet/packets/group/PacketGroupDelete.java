@@ -34,17 +34,11 @@ public class PacketGroupDelete extends Packet {
 			}
 			client.getGroup().destroy();
 		} else {
-			sendError(client, "lang:group_you_are_not_in_any_group", "group_you_are_not_in_any_group");
-		}
-	}
-
-	private void sendError(GatewayRemoteClient client, String title, String message) {
-		client.getGroup().getPlayers().forEach((remoteplayer) -> {
 			try {
-				remoteplayer.sendNotification("error", title, message);
+				client.sendNotification("error", "lang:group_you_are_not_in_any_group", "group_you_are_not_in_any_group");
 			} catch (IOException e) {
 				e.printStackTrace();
 			}
-		});
+		}
 	}
 }
