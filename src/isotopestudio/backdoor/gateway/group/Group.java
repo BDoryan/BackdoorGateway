@@ -81,7 +81,7 @@ public class Group {
 
 	public void message(String type, String message, long ms) {
 		if (message_timer != null && message_timer.isAlive()) {
-			message_timer.destroy();
+			message_timer.stop();
 		}
 		this.message_timer = new Thread(new Runnable() {
 			@Override
