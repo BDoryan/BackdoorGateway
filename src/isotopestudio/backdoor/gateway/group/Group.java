@@ -76,36 +76,36 @@ public class Group {
 		}
 		return true;
 	}
-
-	private Thread message_timer;
-
+	
+	private Timer timer;
+	
 	public void message(String type, String message, long ms) {
-		if (message_timer != null && message_timer.isAlive()) {
-			message_timer.stop();
+		if(timer != null) {
+			timer.cancel();
 		}
-		this.message_timer = new Thread(new Runnable() {
+		players.forEach((client) -> {
+			try {
+				client.sendPacket(new PacketGroupMessage(type, message));
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+		});
+		if (ms < 0)
+			return;
+
+		timer = new Timer();
+		timer.schedule(new TimerTask() {
 			@Override
 			public void run() {
 				players.forEach((client) -> {
 					try {
 						client.sendPacket(new PacketGroupMessage(type, message));
-
-						if (ms < 0)
-							return;
-						try {
-							long timeLeft = System.currentTimeMillis() + ms;
-							while(System.currentTimeMillis() < timeLeft) {}
-							client.sendPacket(new PacketGroupMessage(type, ""));
-						} catch (IOException e) {
-							e.printStackTrace();
-						}
 					} catch (IOException e) {
 						e.printStackTrace();
 					}
 				});
 			}
-		});
-		this.message_timer.start();
+		}, ms);
 	}
 
 	public void whitelist(UUID uuid) {
